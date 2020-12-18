@@ -14,6 +14,18 @@ const inputElevation = document.querySelector('.form__input--elevation');
 navigator.geolocation.getCurrentPosition(function(position) {  // first function executes when it gets the location and the second when it couldn't
     const { latitude } = position.coords
     const { longitude } = position.coords
-    console.log(`https://www.google.com/maps/@${latitude},${longitude}`)
+    const coords = [latitude, longitude]
+    
+    // Leaflet JS library              
+    var map = L.map('map').setView(coords, 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    L.marker(coords).addTo(map)
+    .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+    .openPopup();
+    //
 }, function() {
     alert('Couldn\'t get the location.')})
