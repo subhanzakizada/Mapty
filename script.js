@@ -22,10 +22,21 @@ navigator.geolocation.getCurrentPosition(function(position) {  // first function
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
-
-    L.marker(coords).addTo(map)
-    .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-    .openPopup();
+    
+    // adding an event listener to map
+    map.on('click', function(originalEvent) {
+        const {lat, lng} = originalEvent.latlng
+        
+        // marker
+        L.marker([lat, lng]).addTo(map)
+        .bindPopup(L.popup({minWidth: 100,  // options
+                            maxWidth: 300,
+                            className: 'running-popup',
+                            })
+                  )
+        .setPopupContent('Workout') // content
+        .openPopup();
+    })
     //
 }, function() {
     alert('Couldn\'t get the location.')})
