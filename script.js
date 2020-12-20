@@ -11,9 +11,35 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-let map
-let originalEvent
+// parent of Running and Cycling classes
+class Workout {
+    date = new Date()
+    id = Date.now().toString().slice(3)
 
+    constructor(coords, duration, distance) {
+        this.coords = coords // [lat, lng]
+        this.duration = duration // min
+        this.distance = distance // meters
+    }
+}
+
+// child of Workout class
+class Running extends Workout {
+    constructor(coords, duration, distance, cadence) {
+        super(coords, duration, distance)
+        this.cadence = cadence // stem/min
+    }
+}
+
+// child of Workout class
+class Cycling extends Workout {
+    constructor(coords, duration, distance, elevGain) {
+        super(coords, duration, distance)
+        this.elevGain = elevGain // meters
+    }    
+}
+
+// APPLICATION class
 class App {
     #map
     #mapE
