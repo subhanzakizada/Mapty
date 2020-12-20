@@ -14,65 +14,69 @@ const inputElevation = document.querySelector('.form__input--elevation');
 let map
 let originalEvent
 
-navigator.geolocation.getCurrentPosition(function(position) {  // first function executes when it gets the location and the second when it couldn't
-    const { latitude } = position.coords
-    const { longitude } = position.coords
-    const coords = [latitude, longitude]
+class App {
+    #map
+    #mapE
+    constructor() { // anything inside of the constructor gets execute when the page loads and eventListeners listen for an event
+        this.getPosition()
+        document.addEventListener('submit', this.newWorkout.bind(this))
+        inputType.addEventListener('change', this.toggleElevationField)
+    }
     
-    // Leaflet JS library              
-     map = L.map('map').setView(coords, 13);
+    // gets the user's location and calls loadMap fn according to that
+    getPosition() {
+        navigator.geolocation.getCurrentPosition(this.loadMap.bind(this), function() {
+            alert('Couldn\'t get the location.')})
+    }
+    
+    // loads the map according the positions it gets from getPosition fn
+    loadMap(position) {
+        const { latitude } = position.coords
+        const { longitude } = position.coords
+        const coords = [latitude, longitude]   
+        // Leaflet JS library              
+        this.#map = L.map('map').setView(coords, 13);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-    
-    // adding an event listener to map
-    map.on('click', function(originalE) {
-        originalEvent = originalE
-//        const {lat, lng} = originalEvent.latlng
-//        
-//        // marker
-//        L.marker([lat, lng]).addTo(map)
-//        .bindPopup(L.popup({minWidth: 100,  // options
-//                            maxWidth: 300,
-//                            className: 'running-popup',
-//                              autoclose: false,
-//                              closeOnClick : false
-//                            })
-//                  )
-//        .setPopupContent('Workout') // content
-//        .openPopup();
-    })    
-    //
-    
-    map.on('click', function() {
-        form.classList.remove('hidden')
-        inputDistance.focus()
-    })
-    
-}, function() {
-    alert('Couldn\'t get the location.')})
-
-document.addEventListener('submit', function(e) {
-    e.preventDefault()
-    inputCadence.value = inputDistance.value = inputDuration.value = inputElevation.value = ''
-    const {lat, lng} = originalEvent.latlng
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(this.#map);
         
-    // marker
-    L.marker([lat, lng]).addTo(map)
-    .bindPopup(L.popup({minWidth: 100,  // options
-                        maxWidth: 300,
-                        className: 'running-popup',
-                        autoClose: false,
-                        closeOnClick : false,
-                        })
-              )
-    .setPopupContent('Workout') // content
-    .openPopup();    
-})
-
-inputType.addEventListener('change', function() {
-    inputElevation.closest('.form__row').classList.toggle('form__row--hidden')
-    inputCadence.closest('.form__row').classList.toggle('form__row--hidden')
+        this.#map.on('click', this.showForm.bind(this)) // making the form visible
+        }
     
-})
+    // it removes the hidden class from the form and makes it visible in the page which gets called by getPosition when the user clicks on the map
+    showForm(e) {
+            this.#mapE = e
+            form.classList.remove('hidden')
+            inputDistance.focus()    
+        }
+    
+    // changing the type    
+    toggleElevationField() {
+        inputElevation.closest('.form__row').classList.toggle('form__row--hidden')
+        inputCadence.closest('.form__row').classList.toggle('form__row--hidden')
+        
+    }
+    
+    // creating new workout pop up    
+    newWorkout(e) {
+        e.preventDefault()
+        inputCadence.value = inputDistance.value = inputDuration.value = inputElevation.value = '' 
+        const {lat, lng} = this.#mapE.latlng
+        
+        // marker
+        L.marker([lat, lng]).addTo(this.#map)
+        .bindPopup(L.popup({minWidth: 100,  // options
+                    maxWidth: 300,
+                    className: 'running-popup',
+                    autoClose: false,
+                    closeOnClick : false,
+                    })
+          )
+        .setPopupContent('Workout') // content
+        .openPopup();
+        console.log(1)
+    }
+}
+
+const app = new App()
