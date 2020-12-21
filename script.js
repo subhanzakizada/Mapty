@@ -65,12 +65,13 @@ class App {
     #workouts = []
     #map
     #mapE
-    #w
+    #mapZoomLevel = 13
     
     constructor() { // anything inside of the constructor gets execute when the page loads and eventListeners listen for an event
         this.getPosition()
         document.addEventListener('submit', this.newWorkout.bind(this))
         inputType.addEventListener('change', this.toggleElevationField)
+        containerWorkouts.addEventListener('click', this.moveToPopup.bind(this))
     }
     
     // gets the user's location and calls loadMap fn according to that
@@ -85,7 +86,7 @@ class App {
         const { longitude } = position.coords
         const coords = [latitude, longitude]   
         // Leaflet JS library              
-        this.#map = L.map('map').setView(coords, 13);
+        this.#map = L.map('map').setView(coords, this.#mapZoomLevel);
 
         L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -152,6 +153,7 @@ class App {
             this.renderWorkoutMarker(workout)
             this.#workouts.push(workout)
             this.renderWorkout(workout)
+            console.log(workout)
         }        
         this.hideForm()
     }
@@ -198,6 +200,18 @@ class App {
             form.insertAdjacentHTML('afterend', html)
         }
         
+    moveToPopup(e) { // moves to the workout clicked on the tab
+        const workoutEl = e.target.closest('.workout') 
+        if(!workoutEl) return
+        const workout = this.#workouts.find(workout => workout.id === workoutEl.dataset.id)
+        this.#map.setView(workout.coords, this.#mapZoomLevel, {
+            animate: true,
+            pan: {
+                duration: 1
+            }
+    })
+    }
+        
         // marker
     renderWorkoutMarker(workout) {
         L.marker(workout.coords).addTo(this.#map)
@@ -212,5 +226,4 @@ class App {
        .openPopup();
     }
 }
-
 const app = new App()
