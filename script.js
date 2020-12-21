@@ -68,6 +68,7 @@ class App {
     #mapZoomLevel = 13
     
     constructor() { // anything inside of the constructor gets execute when the page loads and eventListeners listen for an event
+        this.getLocalStorage()
         this.getPosition()
         document.addEventListener('submit', this.newWorkout.bind(this))
         inputType.addEventListener('change', this.toggleElevationField)
@@ -93,6 +94,9 @@ class App {
         }).addTo(this.#map);
         
         this.#map.on('click', this.showForm.bind(this)) // making the form visible
+        this.#workouts.forEach(workout => {
+            this.renderWorkoutMarker(workout)
+          })
         }
     
     // it removes the hidden class from the form and makes it visible in the page which gets called by getPosition when the user clicks on the map
@@ -139,9 +143,6 @@ class App {
             
             //else
             workout = new Running([lat, lng], durationValue, distanceValue, cadanceValue)
-            this.renderWorkoutMarker(workout)
-            this.#workouts.push(workout)
-            this.renderWorkout(workout)
         }
         
         if(type === 'cycling') {
@@ -149,17 +150,18 @@ class App {
                 return alert('Invalid Input!')
             
             // else
-            workout = new Cycling([lat, lng], durationValue, distanceValue, elevationValue)
-            this.renderWorkoutMarker(workout)
-            this.#workouts.push(workout)
-            this.renderWorkout(workout)
-            console.log(workout)
+            workout = new Cycling([lat, lng], durationValue, distanceValue, elevationValue)         
         }        
+        this.renderWorkoutMarker(workout) // render workout marker
+        this.#workouts.push(workout)
+        this.renderWorkout(workout) // rendering workout  
         this.hideForm()
+        this.setLocalStorage()
+            
     }
         
         renderWorkout(workout) {            // common html part for both - running and cycling
-            let html = `<li class="workout workout--running" data-id="${workout.id}">
+            let html = `<li class="workout workout--${workout.type === 'running' ? 'running' : 'cycling'}" data-id="${workout.id}">
                          <h2 class="workout__title">${workout.description}</h2>
                          <div class="workout__details">
                          <span class="workout__icon"></span>
@@ -210,6 +212,26 @@ class App {
                 duration: 1
             }
     })
+    }
+
+    setLocalStorage() {
+        localStorage.setItem('workouts', JSON.stringify(this.#workouts))
+    }
+                    
+    getLocalStorage() {
+        const data = JSON.parse(localStorage.getItem('workouts'))
+        if(!data) return
+        
+        this.#workouts = data
+        this.#workouts.forEach(workout => {
+           this.renderWorkout(workout)
+          })
+        }
+    
+    // only can call from the console
+    removeLocalStorage() {
+        localStorage.removeItem('workouts') // removes the item
+        location.reload() // reloading the location so, the item gets remove live from local storage 
     }
         
         // marker
